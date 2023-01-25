@@ -9,10 +9,10 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
-            <th>Bookable</th>
+            <th>Bookable&nbsp;&nbsp;&nbsp;&nbsp;<span class="bg-success bg-opacity-25">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></th>
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
@@ -34,12 +34,14 @@
             <tr>
                 @if (item.StartTime < DateTime.UtcNow)
                 {
-                    <td class ="bg-danger bg-opacity-75">        
+                    <td class="">
+                        <span class="bg-danger bg-opacity-25 border-info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                     </td>
                 }
-               else
+                else
                 {
-                    <td class="bg-success bg-opacity-75">
+                    <td class="">
+                        <span class="bg-success bg-opacity-25">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                     </td>
                 }
                 <td>
@@ -67,9 +69,6 @@
                 else
                 {
                     <td>
-
-                        
-
                     </td>
                 }
             </tr>
