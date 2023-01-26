@@ -11,7 +11,6 @@ namespace Booking.Web
         public static void Main(string[] args)
         {
 
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -22,19 +21,22 @@ namespace Booking.Web
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
 
                 options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase= false;
+                options.Password.RequireUppercase = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 3;
-            
+
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ => "The field is required");
+            });
 
             var app = builder.Build();
 

@@ -10,45 +10,78 @@ using Booking.Web.Data;
 using Booking.Data.Data;
 using Booking.Web.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Booking.Web.Extensions;
 
 namespace Booking.Web.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
+        [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
         {
             if (id == null || _context.GymClasses == null)
             {
-                return NotFound();
+                //return NotFound();
+                return BadRequest();
             }
 
-            var gymClass = await _context.GymClasses
-                .FirstOrDefaultAsync(m => m.Id == id);
+            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _userManager.GetUserId(User);
 
-            if (gymClass == null)
+            if (userId == null)
             {
                 return NotFound();
             }
 
-            return View(gymClass);
+            //var gymClass = await _context.GymClasses
+            //    .Include(g => g.AttendingMembers)
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+
+            //var attendingMembers = gymClass?.AttendingMembers.FirstOrDefault(a => a.ApplicationUserId == userId);
+
+            var attendingMember = await _context.ApplicationUserGymClass.FindAsync(userId, id);
+
+            if (attendingMember == null)
+            {
+                var booking = new ApplicationUserGymClass
+                {
+                    ApplicationUserId = userId,
+                    GymClassId = (int)id
+                };
+
+                _context.ApplicationUserGymClass.Add(booking);
+            }
+            else
+            {
+                _context.ApplicationUserGymClass.Remove(attendingMember);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+
         }
 
-            // GET: GymClasses
-            public async Task<IActionResult> Index()
+        // GET: GymClasses
+        public async Task<IActionResult> Index()
         {
-           var model = await _context.GymClasses
-                .IgnoreQueryFilters()
-                .OrderByDescending(g => g.StartTime)
-                .ToListAsync();
+            var model = await _context.GymClasses
+                 .IgnoreQueryFilters()
+                 .OrderByDescending(g => g.StartTime)
+                 .ToListAsync();
             //var model = await _context.GymClasses.ToListAsync();
-            
+
             return View(model);
         }
 
@@ -73,7 +106,7 @@ namespace Booking.Web.Controllers
         // GET: GymClasses/Create
         public IActionResult Create()
         {
-            return View();
+            return Request.IsAjax() ? PartialView("CreatePartial") : View();
         }
 
         // POST: GymClasses/Create
@@ -87,8 +120,17 @@ namespace Booking.Web.Controllers
             {
                 _context.Add(gymClass);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                //return Request.IsAjax() ? PartialView("GymClassesPartial", await _context.GymClasses.ToListAsync()) : RedirectToAction(nameof(Index));
+                return Request.IsAjax() ? PartialView("GymClassPartial", gymClass) : RedirectToAction(nameof(Index));
+
             }
+
+            if (Request.IsAjax())
+            {
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return PartialView("CreatePartial", gymClass);
+            }
+        
             return View(gymClass);
         }
 
@@ -101,6 +143,7 @@ namespace Booking.Web.Controllers
             }
 
             var gymClass = await _context.GymClasses.FindAsync(id);
+
             if (gymClass == null)
             {
                 return NotFound();
@@ -175,14 +218,14 @@ namespace Booking.Web.Controllers
             {
                 _context.GymClasses.Remove(gymClass);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GymClassExists(int id)
         {
-          return (_context.GymClasses?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.GymClasses?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

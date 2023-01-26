@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Booking.Core.Entities.GymClass>
+
+<style>
+    table.table > tbody > tr:hover td.stop,
+    table.table > tbody > tr:hover th {
+        background-color: rgba( 220, 53, 69, 0.1);
+        text-decoration-color: rgb( 220, 53, 69);
+        text-decoration-line:line-through;
+        text-decoration-style: solid;
+    }
+    table.table > tbody > tr:hover td.go,
+    table.table > tbody > tr:hover th {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: rgb(25, 135, 84);     
+    }
+</style>
+
+@foreach (var item in Model)
+{
+    <tr>
+        @if (item.StartTime < DateTime.UtcNow)
+        {
+
+            <td class="stop" style=" text-decoration-line:none;">
+                <span style="font-size:.5rem;" class="bg-opacity-25 bg-danger ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </td>
+            <td class="stop ">
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+            <td class="stop ">
+            @Html.DisplayFor(modelItem => item.StartTime)
+        </td>
+            <td class="stop ">
+            @Html.DisplayFor(modelItem => item.Duration)
+        </td>
+            <td class="stop ">
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        }
+        else
+        {
+            <td  class="go">
+                <span style="font-size:.5rem;" class="bg-success bg-opacity-25">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </td>
+            <td class="go">
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td class="go">
+                @Html.DisplayFor(modelItem => item.StartTime)
+            </td>
+            <td class="go">
+                @Html.DisplayFor(modelItem => item.Duration)
+            </td>
+            <td class="go">
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+        }
+        
+        @if (item.StartTime > DateTime.UtcNow)
+        {
+            <td class="go">
+
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+                <a asp-action="BookingToggle" asp-route-id="@item.Id">Book</a>
+            </td>
+        }
+        else
+        {
+             <td class="stop">
+            </td>
+        }
+    </tr>
+}
