@@ -4,6 +4,7 @@
     table.table > tbody > tr:hover td.stop,
     table.table > tbody > tr:hover th {
         background-color: rgba( 220, 53, 69, 0.1);
+        color: rgb( 220, 53, 69);
         text-decoration-color: rgb( 220, 53, 69);
         text-decoration-line:line-through;
         text-decoration-style: solid;
@@ -20,7 +21,6 @@
     <tr>
         @if (item.StartTime < DateTime.UtcNow)
         {
-
             <td class="stop" style=" text-decoration-line:none;">
                 <span style="font-size:.5rem;" class="bg-opacity-25 bg-danger ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             </td>
@@ -59,7 +59,6 @@
         @if (item.StartTime > DateTime.UtcNow)
         {
             <td class="go">
-
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |

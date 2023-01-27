@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Booking.Web.Extensions;
+using System.Security.Claims;
 
 namespace Booking.Web.Controllers
 {
@@ -36,28 +37,49 @@ namespace Booking.Web.Controllers
                 return BadRequest();
             }
 
-            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User); //USER from ApplicationUser (IdentityUser)
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == userId);
+
+            var userName = _userManager.GetUserName(User);
+            var userMail = _userManager.Users.FirstOrDefault(u => u.Id == userId).Email;
+
+            var userClaimEmail = User.FindFirstValue(ClaimTypes.Email);
+            var userClaimId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            //This only finds a BOOKED user otherwise results in null
+            //var user = _context.ApplicationUserGymClass.FirstOrDefault(u => u.ApplicationUserId == userId);
+            //var applicationUserID = user.ApplicationUserId;
+
+
+            var allUsersEmailAddresses = _userManager.Users.Any(u => u.Email.Length > 0);//Gets all emails
+
 
             if (userId == null)
             {
                 return NotFound();
             }
 
-            //var gymClass = await _context.GymClasses
-            //    .Include(g => g.AttendingMembers)
-            //    .FirstOrDefaultAsync(m => m.Id == id);
+            //////// TEST
 
-            //var attendingMembers = gymClass?.AttendingMembers.FirstOrDefault(a => a.ApplicationUserId == userId);
+            var gymClass = await _context.GymClasses
+               .Include(g => g.AttendingMembers)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            var attendingMember = await _context.ApplicationUserGymClass.FindAsync(userId, id);
+            var attendingMember = gymClass?.AttendingMembers.FirstOrDefault(a => a.ApplicationUserId == userId);
+
+            //////// END TEST
+
+            //var attendingMember = await _context.ApplicationUserGymClass.FindAsync(userId, id);
 
             if (attendingMember == null)
             {
                 var booking = new ApplicationUserGymClass
                 {
                     ApplicationUserId = userId,
-                    GymClassId = (int)id
+                    ApplicationUser = user, //Navigational: Adds missing ApplicationUser 
+                    GymClassId = (int)id,
+                    GymClass = gymClass //Navigational: Adds missing GymClass
+
                 };
 
                 _context.ApplicationUserGymClass.Add(booking);
@@ -81,7 +103,6 @@ namespace Booking.Web.Controllers
                  .OrderByDescending(g => g.StartTime)
                  .ToListAsync();
             //var model = await _context.GymClasses.ToListAsync();
-
             return View(model);
         }
 
@@ -94,13 +115,43 @@ namespace Booking.Web.Controllers
             }
 
             var gymClass = await _context.GymClasses
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            var gymClassResult = _context.GymClasses
+               .FirstOrDefaultAsync(c => c.Id == id).Result;//Not using await
+
+            var userId = _userManager.GetUserId(User); //Logged in current user
+
+            var applicationUserGymClass = _context.ApplicationUserGymClass.Where(a => a.GymClassId == id);
+            //All rows with the current gym class and its connected users
+
+            //foreach (var row in applicationUserGymClass) 
+            //{
+            //    gymClass.AttendingMembers = row.GymClass.AttendingMembers.ToList();
+            //}
+
+            var allUsers = _userManager.Users; //All users including not logged in.
+
+            //var allBookedUsers = new List<ApplicationUser>();
+
+            foreach (var user in allUsers) //UserManager work // Alternative WORKS!
+            {
+                foreach (var row in applicationUserGymClass) //Coupling class/table work
+                {
+                    //if (user.Id == row.ApplicationUserId)
+                    //{
+                    //    allBookedUsers.Add(user);
+                    //}
+                }
+            } //This seem to work AUTOMAGICAL!?
+
+
             if (gymClass == null)
             {
                 return NotFound();
             }
 
-            return View(gymClass);
+            return View(gymClassResult);
         }
 
         // GET: GymClasses/Create
@@ -116,13 +167,13 @@ namespace Booking.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,StartTime,Duration,Description")] GymClass gymClass)
         {
+
             if (ModelState.IsValid)
             {
                 _context.Add(gymClass);
                 await _context.SaveChangesAsync();
                 //return Request.IsAjax() ? PartialView("GymClassesPartial", await _context.GymClasses.ToListAsync()) : RedirectToAction(nameof(Index));
                 return Request.IsAjax() ? PartialView("GymClassPartial", gymClass) : RedirectToAction(nameof(Index));
-
             }
 
             if (Request.IsAjax())
@@ -130,7 +181,7 @@ namespace Booking.Web.Controllers
                 Response.StatusCode = StatusCodes.Status400BadRequest;
                 return PartialView("CreatePartial", gymClass);
             }
-        
+
             return View(gymClass);
         }
 
