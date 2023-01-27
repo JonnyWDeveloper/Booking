@@ -157,7 +157,20 @@ namespace Booking.Web.Controllers
         // GET: GymClasses/Create
         public IActionResult Create()
         {
-            return Request.IsAjax() ? PartialView("CreatePartial") : View();
+            if (Request.IsAjax())
+            {
+                return PartialView("CreatePartial");
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+        public IActionResult FetchForm()
+        {
+            return PartialView("CreatePartial");
+           
         }
 
         // POST: GymClasses/Create

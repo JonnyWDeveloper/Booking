@@ -8,16 +8,18 @@
 
 <div id="createajax"></div>
 
-<p>
-    <a asp-action="Create">Create New original</a>
-
-    <a asp-action="Create" class="btn btn-dark"
-       data-ajax="true"
-       data-ajax-method="GET"
-       data-ajax-update="#createajax"
-       data-ajax-mode="replace"
+<div >
+    <a class="btn btn-primary" asp-action="Create">Create New original</a>  
+    <a asp-action="Create" class="btn btn-secondary"
+        data-ajax="true"
+        data-ajax-method="GET"
+        data-ajax-update="#createajax"
+        data-ajax-mode="replace"
        data-ajax-success="fixValidation">Create New Jquery ajax</a>
-</p>
+    <button  id="fetch" class="btn btn-secondary">Fetch</button> 
+</div>
+
+<br />
 
 <table class="table">
     <thead>
