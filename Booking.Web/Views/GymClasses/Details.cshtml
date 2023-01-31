@@ -31,31 +31,25 @@
 
     <tbody id="gymclasses">
         <partial name="GymClassPartialDetails" />
-
     </tbody>
 </table>
 
 
 <div class="row">
-    <br />
-    <br />
-</div>
-<div class="row">
     <h5>Booked by members:</h5>
-    <br />
-    <br />
 
-    @foreach (var member in Model.AttendingMembers)
+    @foreach (var member in ViewData["AttendeeEMailList"] as List<ApplicationUser>)
     {
-        if (member.ApplicationUserId != null)
+        if (member != null)
         {
-            <p>@member.ApplicationUser.Email</p>
-            @*<p>ApplicationUserId: @member.ApplicationUserId</p>*@
-            @*<p>ApplicationUser: @member.ApplicationUser</p>*@
-            @*  <p>GymClassId: @member.GymClassId</p>
-    <p>GymClass.Name: @member.GymClass.Name</p>
-    <p>No. of AttendingMembers: @member.GymClass.AttendingMembers.Count</p>*@
+            <p>Email: <span class="text-primary fw-bolder"> @member.Email </span></p>
+            <p>Username: @member.UserName</p>
+            <p>Id: @member.Id</p>
+            @*       <p>Concurrency stamp: @member.ConcurrencyStamp</p>
+    <p>Security stamp: @member.SecurityStamp</p>
+    <p>Password hash: @member.PasswordHash</p>*@
         }
+        <hr />
     }
 </div>
 

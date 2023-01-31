@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Booking.Web.Extensions;
 using System.Security.Claims;
 using Booking.Data.Repositories;
+using System.Linq;
 
 namespace Booking.Web.Controllers
 {
@@ -43,7 +44,6 @@ namespace Booking.Web.Controllers
             this.userManager = userManager;
         }
         //END NEW
-
         [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
         {
@@ -95,13 +95,12 @@ namespace Booking.Web.Controllers
                     ApplicationUser = user, //Navigational: missing ApplicationUser 
                     GymClassId = (int)id,
                     GymClass = gymClass //Navigational: missing GymClass
-
                 };
 
                 _context.ApplicationUserGymClass.Add(booking);
-            }
+            }  
             else
-            {
+            {                         
                 _context.ApplicationUserGymClass.Remove(attending);
             }
 
@@ -141,38 +140,42 @@ namespace Booking.Web.Controllers
             {
                 return NotFound();
             }
+         
+            var gymClassResult =  await _context.GymClasses.Include(g => g.AttendingMembers)
+               .FirstOrDefaultAsync(c => c.Id == id);
+           
+            var applicationUserGymClass = _context.ApplicationUserGymClass
+                .Include(u => u.ApplicationUser)
+                .Where(a => a.GymClassId == id);
 
-            var gymClass = await _context.GymClasses
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            var gymClassResult = _context.GymClasses
-               .FirstOrDefaultAsync(c => c.Id == id).Result;//Not using await
-
-            var userId = userManager.GetUserId(User); //Logged in current user
-
-            var applicationUserGymClass = _context.ApplicationUserGymClass.Where(a => a.GymClassId == id);
             //All rows with the current gym class and its connected users
+            List<ApplicationUser> applicationUsers = new List<ApplicationUser>();
 
-            //foreach (var row in applicationUserGymClass) 
-            //{
-            //    gymClass.AttendingMembers = row.GymClass.AttendingMembers.ToList();
-            //}
-
-            var allUsers = userManager.Users; //All users including not logged in.
-
-            //var allBookedUsers = new List<ApplicationUser>();
-
-            foreach (var user in allUsers) //UserManager work // Alternative WORKS!
+            foreach (var user in applicationUserGymClass)
             {
-                foreach (var row in applicationUserGymClass) //Coupling class/table work
-                {
-                    //if (user.Id == row.ApplicationUserId)
-                    //{
-                    //    allBookedUsers.Add(user);
-                    //}
-                }
-            } //This seem to work AUTOMAGICAL!?
+                applicationUsers.Add(user.ApplicationUser);
+            }
 
+            //var allUsers = userManager.Users; 
+            //foreach (var user in allUsers) 
+            //{
+            //    foreach (var row in applicationUserGymClass) //Coupling class/table work
+            //    {}                        
+            //} //This seem to work AUTOMAGICAL!?
+
+            var gymClass = _context.GymClasses.Include(g => g.AttendingMembers).Where(c => c.Id == id);
+
+            int i = 1;
+           
+            foreach (var item in gymClass)
+            {
+                if (i == 1)
+                {
+                    var listItem = item.AttendingMembers.Select(u => u.ApplicationUserId).ToList();
+                }
+            }
+
+            ViewData["AttendeeEMailList"] = applicationUsers;
 
             if (gymClass == null)
             {
