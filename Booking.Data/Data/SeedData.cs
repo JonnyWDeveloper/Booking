@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using Booking.Core.Entities;
-using Booking.Data.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Booking.Data
+namespace Booking.Data.Data
 {
     public class SeedData
     {
@@ -20,9 +19,10 @@ namespace Booking.Data
         {
             ArgumentNullException.ThrowIfNull(nameof(context));
             db = context;
-            if (db.GymClasses.Any()) return;
+            if (db.GymClasses.Any())
+                return;
             ArgumentNullException.ThrowIfNull(nameof(services));
-            ArgumentNullException.ThrowIfNull(adminPW , nameof(adminPW));
+            ArgumentNullException.ThrowIfNull(adminPW, nameof(adminPW));
 
             roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             ArgumentNullException.ThrowIfNull(roleManager);
@@ -47,9 +47,11 @@ namespace Booking.Data
         {
             foreach (var role in roleNames)
             {
-                if (await userManager.IsInRoleAsync(admin, role)) continue;
+                if (await userManager.IsInRoleAsync(admin, role))
+                    continue;
                 var result = await userManager.AddToRoleAsync(admin, role);
-                if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+                if (!result.Succeeded)
+                    throw new Exception(string.Join("\n", result.Errors));
             }
         }
 
@@ -57,16 +59,20 @@ namespace Booking.Data
         {
             var found = await userManager.FindByEmailAsync(adminEmail);
 
-            if (found != null) return null!;
+            if (found != null)
+                return null!;
 
             var admin = new ApplicationUser
             {
                 UserName = adminEmail,
-                Email = adminEmail
+                Email = adminEmail,
+                FirstName = "Admin",
+                TimeOfRegistration = DateTime.UtcNow
             };
 
             var result = await userManager.CreateAsync(admin, adminPW);
-            if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+            if (!result.Succeeded)
+                throw new Exception(string.Join("\n", result.Errors));
 
             return admin;
         }
@@ -75,11 +81,13 @@ namespace Booking.Data
         {
             foreach (var roleName in roleNames)
             {
-                if (await roleManager.RoleExistsAsync(roleName)) continue;
+                if (await roleManager.RoleExistsAsync(roleName))
+                    continue;
                 var role = new IdentityRole { Name = roleName };
                 var result = await roleManager.CreateAsync(role);
 
-                if (!result.Succeeded) throw new Exception(string.Join("\n", result.Errors));
+                if (!result.Succeeded)
+                    throw new Exception(string.Join("\n", result.Errors));
             }
         }
 

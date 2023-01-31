@@ -1,4 +1,5 @@
 using Booking.Core.Entities;
+using Booking.Core.Repositories;
 using Booking.Data.Data;
 using Booking.Data.Repositories;
 using Booking.Web.Extensions;
@@ -44,8 +45,8 @@ namespace Booking.Web
             {
                 // options.Filters.Add<AuthorizeFilter>();
 
-                //NOT WORKING
-                //var policy = new AuthorizationPolicyBuilder() 
+           
+                //var policy = new AuthorizationPolicyBuilder()
                 //                    .RequireAuthenticatedUser()
                 //                    .RequireRole("Member")
                 //                    .Build();
@@ -55,14 +56,14 @@ namespace Booking.Web
                 options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(_ => "The field is required");
             });
 
-            builder.Services.AddAuthorization(opt =>
-            {
-                opt.AddPolicy("Test", policy =>
-                {
-                    policy.RequireRole("Admin");
-                    policy.RequireClaim("Test");
-                });
-            });
+            //builder.Services.AddAuthorization(opt =>
+            //{
+            //    opt.AddPolicy("Test", policy =>
+            //    {
+            //        policy.RequireRole("Admin");
+            //        policy.RequireClaim("Test");
+            //    });
+            //});
 
             var app = builder.Build();
 

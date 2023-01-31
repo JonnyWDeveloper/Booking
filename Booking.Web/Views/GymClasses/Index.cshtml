@@ -1,5 +1,4 @@
-﻿@model IEnumerable<Booking.Core.Entities.GymClass>
-
+﻿@model IEnumerable<GymClass>
 @{
     ViewData["Title"] = "Index";
 }
@@ -7,21 +6,35 @@
 <h1>Index</h1>
 
 <div id="createajax"></div>
+@if (User.IsInRole("Admin"))
+{
+    <div>
+        <a asp-action="Create">Create New original</a>
 
-<div>
-    <a class="btn btn-primary" asp-action="Create">Create New original</a>
-    <a asp-action="Create" class="btn btn-secondary"
+        <a asp-action="Create" class="btn btn-dark"
        data-ajax="true"
        data-ajax-method="GET"
        data-ajax-update="#createajax"
        data-ajax-mode="replace"
        data-ajax-success="fixValidation">Create New Jquery ajax</a>
-    <button id="fetch" class="btn btn-secondary">Fetch</button>
-    <button id="fetch2" class="btn btn-dark">Fetch2</button>
 
-</div>
+        <button id="fetch" class="btn btn-dark">Fetch</button>
+        <button id="fetch2" class="btn btn-dark">Fetch2</button>
+    </div>
+}
 
-<br />
+@if (User.IsInRole("Member"))
+{
+    <form asp-action="Index">
+        <div class="form-check">
+@*            <input class="form-check-input" type="checkbox" asp-for="ShowHistory" id="checkbox">
+*@            <label class="form-check-label" for="checkbox">
+                Show History
+            </label>
+        </div>
+    </form>
+}
+
 
 <table class="table">
     <thead>
@@ -39,6 +52,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
+
+
+                
             <th></th>
         </tr>
     </thead>

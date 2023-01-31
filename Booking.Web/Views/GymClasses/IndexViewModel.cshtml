@@ -1,0 +1,64 @@
+﻿@model IndexViewModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div id="createajax"></div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div>
+        <a asp-action="Create">Create New original</a>
+
+        <a asp-action="Create" class="btn btn-dark"
+           data-ajax="true"
+           data-ajax-method="GET"
+           data-ajax-update="#createajax"
+           data-ajax-mode="replace"
+           data-ajax-success="fixValidation">Create New Jquery ajax</a>
+        <button id="fetch" class="btn btn-secondary">Fetch</button>
+        <button id="fetch2" class="btn btn-dark">Fetch2</button>
+    </div>
+}
+
+@if (User.IsInRole("Member"))
+{
+    <form asp-action="IndexViewModel">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" asp-for="ShowHistory" id="checkbox">
+            <label class="form-check-label" for="checkbox">
+                Show History
+            </label>
+        </div>
+    </form>
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Bookable&nbsp;&nbsp;&nbsp;<span style="font-size: 0.5rem;" class="bg-success bg-opacity-25">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></th>
+     
+
+            <th>
+                    @Html.DisplayNameFor(model => model.GymClasses.First().Name)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.GymClasses.First().StartTime)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.GymClasses.First().Duration)
+            </th>
+          
+      
+                
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody id="gymclasses">
+        <partial name="GymClassesPartial" />
+    </tbody>
+</table>

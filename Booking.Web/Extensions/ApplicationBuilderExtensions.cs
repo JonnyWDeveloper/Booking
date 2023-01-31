@@ -1,5 +1,5 @@
-﻿using Booking.Data;
-using Booking.Data.Data;
+﻿using Booking.Data.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Booking.Web.Extensions
 {
@@ -12,8 +12,8 @@ namespace Booking.Web.Extensions
                 var serviceProvider = scope.ServiceProvider;
                 var db = serviceProvider.GetRequiredService<ApplicationDbContext>();
 
-                //db.Database.EnsureDeleted();
-                //db.Database.Migrate();
+               // db.Database.EnsureDeleted();
+                //(db.Database.Migrate();
 
                 //dotnet user-secrets set "AdminPW" "Abc123!"
                 var config = serviceProvider.GetRequiredService<IConfiguration>();

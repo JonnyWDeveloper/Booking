@@ -10,6 +10,9 @@ using Booking.Web.Extensions;
 using System.Security.Claims;
 using Booking.Data.Repositories;
 using System.Linq;
+using Booking.Core.Repositories;
+using Booking.Core.ViewModels;
+using AutoMapper;
 
 namespace Booking.Web.Controllers
 {
@@ -30,6 +33,7 @@ namespace Booking.Web.Controllers
         //NEW
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork uow;
+        private readonly IMapper mapper;
 
         // private readonly GymClassRepository gymClassRepository;
         private readonly UserManager<ApplicationUser> userManager;
@@ -40,9 +44,14 @@ namespace Booking.Web.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
             // gymClassRepository = new GymClassRepository(context);
             this.uow = uow;
-
             this.userManager = userManager;
+            this.mapper = mapper;
         }
+        public bool ShowHistory
+        {
+            get; set;
+        }
+
         //END NEW
         [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
@@ -126,13 +135,40 @@ namespace Booking.Web.Controllers
                  .IgnoreQueryFilters()
                  .OrderByDescending(g => g.StartTime)
                  .ToListAsync();
-            //var model = await _context.GymClasses.ToListAsync();
 
-            // List<GymClass> model = await uow.GymClassRepository.GetAsync(); NEW
-
+            ////var model = await _context.GymClasses.ToListAsync();
+            //// List<GymClass> model = await uow.GymClassRepository.GetAsync(); NEW
             return View(model);
-        }
 
+            //if (User.Identity != null && !User.Identity.IsAuthenticated)
+            //    return View(mapper.Map<IndexViewModel>(await uow.GymClassRepository.GetAsync()));
+
+            //var classes = ShowHistory ?
+            //     await uow.GymClassRepository.GetHistoryAsync()
+            //   : await uow.GymClassRepository.GetWithAttendinAsync();
+
+            //var res = mapper.Map<IndexViewModel>(classes);
+
+            //return View(res);
+
+
+
+        }
+        // GET: GymClasses
+        [AllowAnonymous]
+        public async Task<IActionResult> IndexViewModel(IndexViewModel viewModel)
+        {
+            if (User.Identity != null && !User.Identity.IsAuthenticated)
+                return View(mapper.Map<IndexViewModel>(await uow.GymClassRepository.GetAsync()));
+
+            var gymClasses = viewModel.ShowHistory ?
+                 await uow.GymClassRepository.GetHistoryAsync()
+               : await uow.GymClassRepository.GetWithAttendinAsync();
+
+            var res = mapper.Map<IndexViewModel>(gymClasses);
+
+            return View(res);
+        }
         // GET: GymClasses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -161,7 +197,7 @@ namespace Booking.Web.Controllers
             //{
             //    foreach (var row in applicationUserGymClass) //Coupling class/table work
             //    {}                        
-            //} //This seem to work AUTOMAGICAL!?
+            //} //This seem to work AUTOMAGICAL
 
             var gymClass = _context.GymClasses.Include(g => g.AttendingMembers).Where(c => c.Id == id);
 
@@ -217,6 +253,7 @@ namespace Booking.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("Id,Name,StartTime,Duration,Description")] GymClass gymClass)
         {
 
