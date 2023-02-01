@@ -62,36 +62,23 @@ namespace Booking.Web.Controllers
                 return BadRequest();
             }
 
+            //var userName = userManager.GetUserName(User);
+            //var userClaimEmail = User.FindFirstValue(ClaimTypes.Email);
+            //var userClaimId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var userId = userManager.GetUserId(User); //USER from ApplicationUser (IdentityUser)
             var user = userManager.Users.FirstOrDefault(u => u.Id == userId);
-
-            var userName = userManager.GetUserName(User);
-            var userMail = userManager.Users.FirstOrDefault(u => u.Id == userId).Email;
-
-            var userClaimEmail = User.FindFirstValue(ClaimTypes.Email);
-            var userClaimId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            //This only finds a BOOKED user otherwise results in null
-            //var attendingUser = _context.ApplicationUserGymClass.FirstOrDefault(u => u.ApplicationUserId == userId);
-            //var applicationUserID = attendingUser.ApplicationUserId;
-
-            var allUsersEmailAddresses = userManager.Users.Any(u => u.Email.Length > 0);//Gets all emails
-
 
             if (userId == null)
             {
                 return NotFound();
             }
 
-            //////// TEST
-
             var gymClass = await _context.GymClasses
                .Include(g => g.AttendingMembers)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             var attendingMember = gymClass?.AttendingMembers.FirstOrDefault(a => a.ApplicationUserId == userId);
-
-            //////// END TEST
 
             //var attending = await _context.ApplicationUserGymClass.FindAsync(userId, id);
             ApplicationUserGymClass? attending = await FindAsync(id, userId);
@@ -107,9 +94,9 @@ namespace Booking.Web.Controllers
                 };
 
                 _context.ApplicationUserGymClass.Add(booking);
-            }  
+            }
             else
-            {                         
+            {
                 _context.ApplicationUserGymClass.Remove(attending);
             }
 
@@ -176,10 +163,10 @@ namespace Booking.Web.Controllers
             {
                 return NotFound();
             }
-         
-            var gymClassResult =  await _context.GymClasses.Include(g => g.AttendingMembers)
+
+            var gymClassResult = await _context.GymClasses.Include(g => g.AttendingMembers)
                .FirstOrDefaultAsync(c => c.Id == id);
-           
+
             var applicationUserGymClass = _context.ApplicationUserGymClass
                 .Include(u => u.ApplicationUser)
                 .Where(a => a.GymClassId == id);
@@ -202,7 +189,7 @@ namespace Booking.Web.Controllers
             var gymClass = _context.GymClasses.Include(g => g.AttendingMembers).Where(c => c.Id == id);
 
             int i = 1;
-           
+
             foreach (var item in gymClass)
             {
                 if (i == 1)

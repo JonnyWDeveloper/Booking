@@ -25,10 +25,10 @@
 
 @if (User.IsInRole("Member"))
 {
-    <form asp-action="Index">
+    <form asp-action="Index" >
         <div class="form-check">
-@*            <input class="form-check-input" type="checkbox" asp-for="ShowHistory" id="checkbox">
-*@            <label class="form-check-label" for="checkbox">
+            <input class="form-check-input" type="checkbox"  id="checkbox">
+            <label class="form-check-label" for="checkbox">
                 Show History
             </label>
         </div>
